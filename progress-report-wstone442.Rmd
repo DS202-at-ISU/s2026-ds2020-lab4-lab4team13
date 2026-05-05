@@ -11,15 +11,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Will's lab 4 notes:
 
-load libraries and  data
+load libraries and data
+
 ```{r}
 library(rvest)
 library(tidyverse)
 url <- "https://www.baseball-reference.com/awards/hof_2026.shtml"
 ```
 
-
 scraping the data and fix variable names
+
 ```{r}
 html <- read_html(url)
 tables <- html_table(html)
@@ -32,6 +33,7 @@ colnames(data) <- make.unique(colnames(data))
 ```
 
 cleaning the data
+
 ```{r}
 clean_data <- data %>%
   filter(Name != "Name" & Name != "") %>%
@@ -49,6 +51,7 @@ clean_data <- data %>%
 ```
 
 results
+
 ```{r}
 readr::write_csv(clean_data, file="cleaned_hof_2026.csv")
 head(clean_data, 5)
