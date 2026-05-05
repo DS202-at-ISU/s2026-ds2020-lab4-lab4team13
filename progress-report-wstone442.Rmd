@@ -9,5 +9,47 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 Will's lab 4 notes:
+
+load libraries and  data
+```{r}
+library(rvest)
+library(tidyverse)
+url <- "https://www.baseball-reference.com/awards/hof_2026.shtml"
+```
+
+
+scraping the data and fix variable names
+```{r}
+html <- read_html(url)
+tables <- html_table(html)
+data <- tables[[1]]
+
+real_col_names <- data[1, ]
+colnames(data) <- real_col_names
+data <- data[-1, ]
+colnames(data) <- make.unique(colnames(data))
+```
+
+cleaning the data
+```{r}
+clean_data <- data %>%
+  filter(Name != "Name" & Name != "") %>%
+  select(player_name = Name,Votes,`%vote`) %>%
+  mutate(
+    player_name = gsub("X-", "", player_name),
+    player_name = trimws(player_name),
+    year = 2026,
+    votes = as.numeric(Votes),
+    percent_of_vote = readr::parse_number(`%vote`),
+    inducted = ifelse(percent_of_vote >= 75, "Y", "N")
+  ) %>%
+  select(player_name, year, votes, percent_of_vote, inducted) %>%
+  drop_na(player_name, votes)
+```
+
+results
+```{r}
+readr::write_csv(clean_data, file="cleaned_hof_2026.csv")
+head(clean_data, 5)
+```
