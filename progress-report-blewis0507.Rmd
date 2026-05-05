@@ -8,5 +8,42 @@ date: "2026-05-04"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r}
+# scraping data
+library(rvest)
+library(tidyverse)
+url <- "https://www.baseball-reference.com/awards/hof_2026.shtml"
+html <- read_html(url)
+tables <- html_table(html)
+
+
+# dealing with first line variable names 
+data <- tables[[1]]
+actual_col_names <- data[1, ]
+colnames(data) <- actual_col_names
+data <- data[-1, ]
+head(data, 3)
+```
+
+
+
+```{r}
+# data cleaning 
+
+hof_2026_cleaned <- data |>
+  select(Name, Votes, `%vote`) |>
+  mutate(
+    Name = gsub("X-", "", Name),
+    yearID = 2026,
+    Votes = as.numeric(Votes),
+    percent_vote = readr::parse_number(`%vote`),
+    inducted = ifelse(percent_vote >= 75, "Y", "N")
+  )
+
+# columns giving percentage of the vote, removing the one which is not a double 
+of_2026_cleaned <- hof_2026_cleaned |>
+ select(-`%vote`)
+
+head(hof_2026_cleaned)
+```
 
